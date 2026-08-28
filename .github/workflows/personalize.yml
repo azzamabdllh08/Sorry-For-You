@@ -1,0 +1,28 @@
+name: Apply requested wording
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  update-page:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update apology wording
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('Jadi untuk semua yang membuatmu terluka karena aku: <strong>maaf, Varadilla.</strong>', 'Jadi untuk semua yang membuatmu terluka karena aku: <strong>maaf, sayang.</strong>')
+          s = s.replace('Karena cerita kita lebih besar dari satu kesalahan.', 'Aku tahu aku telah membuatmu terluka.')
+          s = s.replace('Aku tidak ingin satu momen buruk membuatku lupa pada semua hal baik yang pernah kita jalani bersama.', 'Dan aku tidak ingin sekadar meminta maaf. Aku ingin memperbaikinya.')
+          p.write_text(s, encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet || git commit -m 'Refine apology wording'
+          git push
